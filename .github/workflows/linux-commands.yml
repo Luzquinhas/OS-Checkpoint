@@ -1,0 +1,46 @@
+name: Linux Permissions Evidence
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate-evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Instalar dependências
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y imagemagick aha
+
+      - name: Criar diretórios e arquivos
+        run: |
+          mkdir -p ~/Scripts ~/Logs ~/App
+          touch ~/Scripts/3ESPW.sh
+          touch ~/Logs/relatorio.log
+          touch ~/App/disposition.app
+          chmod 755 ~/Scripts/3ESPW.sh       # -rwxr-xr-x
+          chmod 770 ~/Logs/relatorio.log     # -rwxrwx---
+          chmod 555 ~/App/disposition.app    # -r-xr-xr-x
+          sudo chown root:root ~/Scripts/3ESPW.sh
+          sudo chown root:root ~/App/disposition.app
+          chmod 755 ~/Scripts ~/Logs ~/App
+
+      - name: Gerar logs
+        run: |
+          echo "==== ls -lR /home/runner ====" > evidence.txt
+          ls -lR /home/runner >> evidence.txt
+          echo "" >> evidence.txt
+          echo "==== Outro usuário acessando ====" >> evidence.txt
+          sudo useradd rm98344
+          sudo -u rm98344 ls -lR ~/Scripts ~/Logs ~/App >> evidence.txt
+
+      - name: Converter logs em imagem
+        run: |
+          cat evidence.txt | aha --black --title "Evidências" > evidence.html
+          convert -density 150 evidence.html -quality 90 evidence.png
+
+      - name: Upload evidências
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencias
+          path: evidence.png
