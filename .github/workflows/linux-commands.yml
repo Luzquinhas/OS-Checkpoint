@@ -27,12 +27,13 @@ jobs:
 
       - name: Gerar logs
         run: |
-          echo "==== ls -lR /home/runner ====" > evidence.txt
-          ls -lR /home/runner >> evidence.txt
+          echo "==== ls -lR ~/Scripts ~/Logs ~/App ====" > evidence.txt
+          ls -lR ~/Scripts ~/Logs ~/App >> evidence.txt
           echo "" >> evidence.txt
           echo "==== Outro usuário acessando ====" >> evidence.txt
-          sudo useradd rm98344
-          sudo -u rm98344 ls -lR ~/Scripts ~/Logs ~/App >> evidence.txt
+          sudo useradd testeuser
+          sudo -u testeuser ls -lR ~/Scripts ~/Logs ~/App >> evidence.txt
+
 
       - name: Converter logs em imagem
         run: |
